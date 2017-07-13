@@ -22,12 +22,14 @@ public class PacienteController {
 
 	@RequestMapping(value = "/cadastrar", method = RequestMethod.POST)
 	public ResponseEntity<Paciente> cadastrar(@RequestBody Paciente paciente) {
+		System.out.println(PacienteController.class.toString() + "/cadastrar");
 		repositorio.add(paciente);
 		return new ResponseEntity<Paciente>(paciente, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
 	public ResponseEntity<List<Paciente>> getAll() {
+		System.out.println(PacienteController.class.toString() + "/getAll");
 		return new ResponseEntity<List<Paciente>>(repositorio.getAll(), HttpStatus.OK);
 	}
 }
