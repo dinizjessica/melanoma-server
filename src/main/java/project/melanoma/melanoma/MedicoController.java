@@ -37,10 +37,20 @@ public class MedicoController {
 	
 	@RequestMapping(value = "/cadastrar", method = RequestMethod.POST)
 	public ResponseEntity cadastrar(@RequestBody Medico medico) {
-		System.out.println(MedicoController.class.toString()+"/cadastrar");
-		medico.setPacientes(new ArrayList<>());
-		repositorio.add(medico);
-		return new ResponseEntity<>(HttpStatus.OK);
+		System.out.println(MedicoController.class.toString()+"/cadastrar"+medico.toString());
+
+		if (medico.getCrm() != null) {
+			Optional<Medico> medicoDaBase = repositorio.getByCRM(medico.getCrm());
+			Medico result;
+			if (medicoDaBase.isPresent()) {
+				result = repositorio.update(medicoDaBase.get(), medico);
+			} else {
+				medico.setPacientes(new ArrayList<>());
+				result = repositorio.add(medico);
+			}
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}
+		return new ResponseEntity<>("CRM e obrigatorio", HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
 	@RequestMapping(value = "/login/{crm}", method = RequestMethod.POST)

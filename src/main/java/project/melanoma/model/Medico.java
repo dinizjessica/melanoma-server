@@ -7,16 +7,23 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"crm"})
 @Setter
 @Getter
+@ToString
 public class Medico {
 	private String nome;
 	private String crm;
 	private String telefone;
-	private String endereco;
+	private Endereco endereco;
+	private String email;
+	private String dataNascimento;
+	private String CPF;
+	private String RG;
+
 	@JsonIgnore
 	private String status; //ativo ou inativo
 	@JsonIgnore

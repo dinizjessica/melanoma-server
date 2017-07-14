@@ -15,8 +15,8 @@ public class Paciente {
 	private String cpf;
 //	private String sexo;
 //	private int idade;
-//	private String telefone;
-//	private String endereco;
+	private String telefone;
+	private String endereco;
 //	private String diagnostico;
 //	private String status;
 //	private int excluido;
