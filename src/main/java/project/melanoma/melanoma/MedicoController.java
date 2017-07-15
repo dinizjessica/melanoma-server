@@ -31,10 +31,10 @@ import project.melanoma.repositorio.MedicoRepositorio;
 @RestController
 @RequestMapping("/medico")
 public class MedicoController {
-	
+
 	@Autowired
 	private MedicoRepositorio repositorio;
-	
+
 	@RequestMapping(value = "/cadastrar", method = RequestMethod.POST)
 	public ResponseEntity cadastrar(@RequestBody Medico medico) {
 		System.out.println(MedicoController.class.toString()+"/cadastrar"+medico.toString());
@@ -64,13 +64,13 @@ public class MedicoController {
 
 		return new ResponseEntity<>(medico.get(), HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
 	public ResponseEntity<List<Medico>> getAll() {
 		System.out.println(MedicoController.class.toString()+"/getAll");
 		return new ResponseEntity<List<Medico>>(repositorio.getAll(), HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/getPacientes/{crm}", method = RequestMethod.GET)
     public ResponseEntity getPacientes(@PathVariable String crm) {
 		System.out.println(MedicoController.class.toString()+"/getPacientes");
@@ -80,7 +80,7 @@ public class MedicoController {
 		}
         return new ResponseEntity<List<Paciente>>(medico.get().getPacientes(), HttpStatus.OK);
     }
-	
+
 	@RequestMapping(value = "/cadastrarPaciente/{crm}", method = RequestMethod.POST)
     public ResponseEntity cadastrarPaciente(@PathVariable(value="crm") String crm, @RequestBody Paciente paciente) {
 		System.out.println(MedicoController.class.toString()+"/cadastrarPaciente");
@@ -91,7 +91,7 @@ public class MedicoController {
 		medico.get().cadastrarPaciente(paciente);
         return new ResponseEntity(HttpStatus.OK);
     }
-	
+
 	@RequestMapping(value = "/getMedico/{crm}", method = RequestMethod.GET)
     public ResponseEntity getMedico(@PathVariable String crm) throws IOException {
 		System.out.println(MedicoController.class.toString()+"/getMedico/"+crm);
@@ -101,28 +101,45 @@ public class MedicoController {
 		}
 		return new ResponseEntity<Medico>(medico.get(), HttpStatus.OK);
     }
-	
-	@RequestMapping(value = "/processarImagem", method = RequestMethod.POST, consumes = "multipart/form-data", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity processarImagem(@RequestParam("file") MultipartFile file, @RequestParam("cpf") String cpf) throws IOException {
+
+	@RequestMapping(
+	        value = "/processarImagem",
+            method = RequestMethod.POST,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity processarImagem(@RequestParam (value = "file") MultipartFile file) throws IOException {//, @RequestParam("cpf") String cpf) throws IOException {
 		System.out.println(MedicoController.class.toString()+"/processarImagem");
-		System.out.println(cpf);
+//		System.out.println(cpf);
 		byte[] bytes = file.getBytes();
-		String UPLOADED_FOLDER = "/Users/jessicadiniz/Documents/eclipse_maven2/workspace/melanoma/resource/";
+		String UPLOADED_FOLDER = "/Users/jdiniz/Documents/android/melanoma-server/resource/";
+//		String UPLOADED_FOLDER = "/Users/jessicadiniz/Documents/eclipse_maven2/workspace/melanoma/resource/";
         Path path = Paths.get(UPLOADED_FOLDER + file.getOriginalFilename());
         Files.write(path, bytes);
-		
+
 		return new ResponseEntity(HttpStatus.OK);
     }
-	
+
+    @RequestMapping(value = "/processarImagemByte", method = RequestMethod.POST)
+    public ResponseEntity processarImagemByte(@RequestBody String bytes) throws IOException {//, @RequestParam("cpf") String cpf) throws IOException {
+        System.out.println(MedicoController.class.toString()+"/processarImagemByte");
+//		System.out.println(cpf);
+//        byte[] bytes = file.getBytes();
+//        String UPLOADED_FOLDER = "/Users/jdiniz/Documents/android/melanoma-server/resource/";
+////		String UPLOADED_FOLDER = "/Users/jessicadiniz/Documents/eclipse_maven2/workspace/melanoma/resource/";
+//        Path path = Paths.get(UPLOADED_FOLDER + file.getOriginalFilename());
+//        Files.write(path, bytes);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
 	@RequestMapping(value = "/getResultado", method = RequestMethod.GET)
     public ResponseEntity getResultado() throws IOException {
 		System.out.println(MedicoController.class.toString()+"/getResultado");
 	    String filePath = "/Users/jessicadiniz/Documents/eclipse_maven2/workspace/melanoma/resource/ISIC_0000001.jpg";
 	    byte[] array = Files.readAllBytes(new File(filePath).toPath());
-	    
+
 	    final HttpHeaders headers = new HttpHeaders();
 	    headers.setContentType(MediaType.IMAGE_JPEG);
-	    
+
 	    return new ResponseEntity<byte[]>(array, headers, HttpStatus.OK);
     }
 }
