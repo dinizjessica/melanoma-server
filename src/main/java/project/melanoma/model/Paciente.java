@@ -6,17 +6,18 @@ import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"cpf"})
+@EqualsAndHashCode(of = {"id"})
 @Setter
 @Getter
 public class Paciente {
-//	private int id;
+	private long id;
 	private String nome;
 	private String cpf;
 //	private String sexo;
 //	private int idade;
 	private String telefone;
 	private String endereco;
+	private String caminhoFoto;
 //	private String diagnostico;
 //	private String status;
 //	private int excluido;
