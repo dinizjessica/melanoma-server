@@ -139,7 +139,7 @@ public class MedicoController {
 
     @RequestMapping(value = "/getResultado/{pacient_id}", method = RequestMethod.GET)
     public ResponseEntity getResultado(@PathVariable(value = "pacient_id") long pacientId) throws IOException {
-        System.out.println(MedicoController.class.toString() + "/getResultado");
+        System.out.println(MedicoController.class.toString() + "/getResultado/"+pacientId);
 
         Optional<Paciente> paciente = pacienteRepositorio.getById(pacientId);
 
