@@ -1,10 +1,9 @@
 package project.melanoma.melanoma;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,119 +25,132 @@ import project.melanoma.model.Medico;
 import project.melanoma.model.Paciente;
 import project.melanoma.repositorio.MedicoRepositorio;
 import project.melanoma.repositorio.PacienteRepositorio;
-import project.melanoma.repositorio.Repositorio;
+import project.melanoma.segmentation.ImagemUtil;
 
 @RestController
 @RequestMapping("/medico")
 public class MedicoController {
 
-	@Autowired
-	private MedicoRepositorio medicoRepositorio;
+    @Autowired
+    private MedicoRepositorio medicoRepositorio;
 
-	@Autowired
-	private PacienteRepositorio pacienteRepositorio;
+    @Autowired
+    private PacienteRepositorio pacienteRepositorio;
 
-	@RequestMapping(value = "/cadastrar", method = RequestMethod.POST)
-	public ResponseEntity cadastrar(@RequestBody Medico medico) {
-		System.out.println(MedicoController.class.toString()+"/cadastrar"+medico.toString());
+    @RequestMapping(value = "/cadastrar", method = RequestMethod.POST)
+    public ResponseEntity cadastrar(@RequestBody Medico medico) {
+        System.out.println(MedicoController.class.toString() + "/cadastrar" + medico.toString());
 
-		if (medico.getCrm() != null) {
-			Optional<Medico> medicoDaBase = medicoRepositorio.getByCRM(medico.getCrm());
-			Medico result;
-			if (medicoDaBase.isPresent()) {
-				result = medicoRepositorio.update(medicoDaBase.get(), medico);
-			} else {
-				medico.setPacientes(new ArrayList<>());
-				result = medicoRepositorio.add(medico);
-			}
-			return new ResponseEntity<>(result, HttpStatus.OK);
-		}
-		return new ResponseEntity<>("CRM e obrigatorio", HttpStatus.UNPROCESSABLE_ENTITY);
-	}
+        if (medico.getCrm() != null) {
+            Optional<Medico> medicoDaBase = medicoRepositorio.getByCRM(medico.getCrm());
+            Medico result;
+            if (medicoDaBase.isPresent()) {
+                result = medicoRepositorio.update(medicoDaBase.get(), medico);
+            } else {
+                medico.setPacientes(new ArrayList<>());
+                result = medicoRepositorio.add(medico);
+            }
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        return new ResponseEntity<>("CRM e obrigatorio", HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
-	@RequestMapping(value = "/login/{crm}", method = RequestMethod.POST)
-	public ResponseEntity cadastrar(@PathVariable String crm, @RequestBody String password) {
-		System.out.println(MedicoController.class.toString()+"/login/"+crm);
+    @RequestMapping(value = "/login/{crm}", method = RequestMethod.POST)
+    public ResponseEntity cadastrar(@PathVariable String crm, @RequestBody String password) {
+        System.out.println(MedicoController.class.toString() + "/login/" + crm);
 
-		Optional<Medico> medico = medicoRepositorio.login(crm, password.replaceAll("\"", ""));
-		if (!medico.isPresent()) {
-			return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
-		}
+        Optional<Medico> medico = medicoRepositorio.login(crm, password.replaceAll("\"", ""));
+        if (!medico.isPresent()) {
+            return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
 
-		return new ResponseEntity<>(medico.get(), HttpStatus.OK);
-	}
+        return new ResponseEntity<>(medico.get(), HttpStatus.OK);
+    }
 
-	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
-	public ResponseEntity<List<Medico>> getAll() {
-		System.out.println(MedicoController.class.toString()+"/getAll");
-		return new ResponseEntity<List<Medico>>(medicoRepositorio.getAll(), HttpStatus.OK);
-	}
+    @RequestMapping(value = "/getAll", method = RequestMethod.GET)
+    public ResponseEntity<List<Medico>> getAll() {
+        System.out.println(MedicoController.class.toString() + "/getAll");
+        return new ResponseEntity<List<Medico>>(medicoRepositorio.getAll(), HttpStatus.OK);
+    }
 
-	@RequestMapping(value = "/getPacientes/{crm}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getPacientes/{crm}", method = RequestMethod.GET)
     public ResponseEntity getPacientes(@PathVariable String crm) {
-		System.out.println(MedicoController.class.toString()+"/getPacientes");
-		Optional<Medico> medico = medicoRepositorio.getByCRM(crm);
-		if (!medico.isPresent()) {
-			return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
-		}
+        System.out.println(MedicoController.class.toString() + "/getPacientes");
+        Optional<Medico> medico = medicoRepositorio.getByCRM(crm);
+        if (!medico.isPresent()) {
+            return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         return new ResponseEntity<List<Paciente>>(medico.get().getPacientes(), HttpStatus.OK);
     }
 
-	@RequestMapping(value = "/cadastrarPaciente/{crm}", method = RequestMethod.POST)
-    public ResponseEntity cadastrarPaciente(@PathVariable(value="crm") String crm, @RequestBody Paciente paciente) {
-		System.out.println(MedicoController.class.toString()+"/cadastrarPaciente");
-		Optional<Medico> medico = medicoRepositorio.getByCRM(crm);
-		if (!medico.isPresent()) {
-			return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
-		}
-		paciente.setId(System.currentTimeMillis());
-		pacienteRepositorio.add(paciente);
-		medico.get().cadastrarPaciente(paciente);
+    @RequestMapping(value = "/cadastrarPaciente/{crm}", method = RequestMethod.POST)
+    public ResponseEntity cadastrarPaciente(@PathVariable(value = "crm") String crm, @RequestBody Paciente paciente) {
+        System.out.println(MedicoController.class.toString() + "/cadastrarPaciente");
+        Optional<Medico> medico = medicoRepositorio.getByCRM(crm);
+        if (!medico.isPresent()) {
+            return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        paciente.setId(System.currentTimeMillis());
+        pacienteRepositorio.add(paciente);
+        medico.get().cadastrarPaciente(paciente);
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@RequestMapping(value = "/getMedico/{crm}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getMedico/{crm}", method = RequestMethod.GET)
     public ResponseEntity getMedico(@PathVariable String crm) throws IOException {
-		System.out.println(MedicoController.class.toString()+"/getMedico/"+crm);
-		Optional<Medico> medico = medicoRepositorio.getByCRM(crm);
-		if (!medico.isPresent()) {
-			return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
-		}
-		return new ResponseEntity<Medico>(medico.get(), HttpStatus.OK);
+        System.out.println(MedicoController.class.toString() + "/getMedico/" + crm);
+        Optional<Medico> medico = medicoRepositorio.getByCRM(crm);
+        if (!medico.isPresent()) {
+            return new ResponseEntity<String>("CRM nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        return new ResponseEntity<Medico>(medico.get(), HttpStatus.OK);
     }
 
-	@RequestMapping(value = "/processarImagem/{pacient_id}", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity processarImagem(@RequestParam (value = "file") MultipartFile file,
+    @RequestMapping(value = "/processarImagem/{pacient_id}", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity processarImagem(@RequestParam(value = "file") MultipartFile file,
                                           @PathVariable(value = "pacient_id") long pacientId) throws IOException {
-		System.out.println(MedicoController.class.toString()+"/processarImagem/"+pacientId);
+        System.out.println(MedicoController.class.toString() + "/processarImagem/" + pacientId);
 
-		Optional<Paciente> paciente = pacienteRepositorio.getById(pacientId);
+        Optional<Paciente> paciente = pacienteRepositorio.getById(pacientId);
 
-		if (paciente.isPresent()) {
+        if (paciente.isPresent()) {
             paciente.get().setCaminhoFoto(file.getOriginalFilename());
-            savePhoto(file);
+            ImagemUtil.saveOriginalPhoto(file, paciente.get().getId());
+
+            processarImagem(file, paciente);
             return new ResponseEntity(paciente.get(), HttpStatus.OK);
         }
         return new ResponseEntity<String>("Paciente nao encontrado", HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    private void savePhoto(MultipartFile file) throws IOException {
-        byte[] bytes = file.getBytes();
-        String UPLOADED_FOLDER = "/Users/jdiniz/Documents/android/melanoma-server/resource/";
-//		String UPLOADED_FOLDER = "/Users/jessicadiniz/Documents/eclipse_maven2/workspace/melanoma/resource/";
-        Path path = Paths.get(UPLOADED_FOLDER + file.getOriginalFilename());
-        Files.write(path, bytes);
+    private void processarImagem(@RequestParam(value = "file") MultipartFile file, Optional<Paciente> paciente) {
+        // processando em uma nova thread
+        Runnable processarESalvarImg = () -> {
+            BufferedImage result = null;
+            try {
+                result = ImagemUtil.processarImagem(file.getBytes());
+                ImagemUtil.saveResultedImage(result, paciente.get());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        };
+        new Thread(processarESalvarImg).start();
     }
 
-    @RequestMapping(value = "/getResultado", method = RequestMethod.GET)
-    public ResponseEntity getResultado() throws IOException {
-		System.out.println(MedicoController.class.toString()+"/getResultado");
-	    String filePath = "/Users/jessicadiniz/Documents/eclipse_maven2/workspace/melanoma/resource/ISIC_0000001.jpg";
-	    byte[] array = Files.readAllBytes(new File(filePath).toPath());
+    @RequestMapping(value = "/getResultado/{pacient_id}", method = RequestMethod.GET)
+    public ResponseEntity getResultado(@PathVariable(value = "pacient_id") long pacientId) throws IOException {
+        System.out.println(MedicoController.class.toString() + "/getResultado");
 
-	    final HttpHeaders headers = new HttpHeaders();
-	    headers.setContentType(MediaType.IMAGE_JPEG);
+        Optional<Paciente> paciente = pacienteRepositorio.getById(pacientId);
 
-	    return new ResponseEntity<byte[]>(array, headers, HttpStatus.OK);
+        if (paciente.isPresent() && !paciente.get().getCaminhoFoto().isEmpty()) {
+            byte[] array = ImagemUtil.getResultedImage(paciente.get());
+
+            final HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG);
+
+            return new ResponseEntity<byte[]>(array, headers, HttpStatus.OK);
+        }
+        return new ResponseEntity<String>("Paciente ou imagem nao encontrada", HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

@@ -1,11 +1,9 @@
 package project.melanoma.repositorio;
 
-import java.lang.reflect.Field;
-import java.util.Optional;
-
 import org.springframework.stereotype.Repository;
-
 import project.melanoma.model.Medico;
+
+import java.util.Optional;
 
 @Repository
 public class MedicoRepositorio extends Repositorio<Medico> {
